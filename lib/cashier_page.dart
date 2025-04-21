@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:project_nganggur/checkout_page.dart';
-import 'package:project_nganggur/models/cart_item.dart'; // Tambahkan import ini
+import 'package:project_nganggur/models/cart_item.dart';
+import 'package:project_nganggur/models/menu_item.dart';
+import 'package:project_nganggur/models/menu_data.dart';
 
 class CashierPage extends StatefulWidget {
   final Function()? onCheckoutComplete;
@@ -16,7 +18,7 @@ class CashierPage extends StatefulWidget {
 
 class _CashierPageState extends State<CashierPage> {
   // Add color constants
-  static const Color primaryColor = Color(0xFF3E2723); // Deep Brown
+  static const Color primaryColor = Color(0xFF1A1817); // Rich Black
   static const Color accentColor = Color(0xFFD4AF37); // Gold
   static const Color backgroundColor = Color(0xFFF5F5F5); // Off-white
   static const Color textColor = Color(0xFF2D2D2D); // Almost black
@@ -25,42 +27,9 @@ class _CashierPageState extends State<CashierPage> {
 
   final TextEditingController searchController = TextEditingController();
 
-  // Menambahkan List Map untuk data dummy
-  final List<Map<String, dynamic>> _products = [
-    {
-      'name': 'Nasi Goreng',
-      'category': 'Makanan',
-      'price': 12000,
-      'image': 'assets/images/nasgor.jpg',
-    },
-    {
-      'name': 'Es Teh',
-      'category': 'Minuman',
-      'price': 3000,
-      'image': 'assets/images/esteh.jpg',
-    },
-    {
-      'name': 'Mie Goreng',
-      'category': 'Makanan',
-      'price': 8000,
-      'image': 'assets/images/miegoreng.jpg',
-    },
-    {
-      'name': 'Es Jeruk',
-      'category': 'Minuman',
-      'price': 5000,
-      'image': 'assets/images/esjeruk.jpg',
-    },
-    {
-      'name': 'Ayam Goreng + Nasi',
-      'category': 'Makanan',
-      'price': 15000,
-      'image': 'assets/images/ayamgoreng.jpg',
-    },
-  ];
-
-  // Tambahkan variabel untuk menyimpan hasil pencarian
-  List<Map<String, dynamic>> _foundProducts = [];
+  // Replace _products with MenuItem list
+  final List<MenuItem> _products = MenuData.getAllItems();
+  List<MenuItem> _foundProducts = [];
 
   // Tambahkan Map untuk menyimpan quantity setiap item
   final Map<int, int> _itemQuantities = {};
@@ -73,16 +42,16 @@ class _CashierPageState extends State<CashierPage> {
 
   // Fungsi untuk melakukan pencarian
   void _runFilter(String enteredKeyword) {
-    List<Map<String, dynamic>> results = [];
+    List<MenuItem> results = [];
     if (enteredKeyword.isEmpty) {
       results = _products;
     } else {
       results = _products
           .where((product) =>
-              product['name']
+              product.name
                   .toLowerCase()
                   .contains(enteredKeyword.toLowerCase()) ||
-              product['category']
+              product.category
                   .toLowerCase()
                   .contains(enteredKeyword.toLowerCase()))
           .toList();
@@ -112,10 +81,10 @@ class _CashierPageState extends State<CashierPage> {
           .map((entry) {
         final product = _products[entry.key];
         return CartItem(
-          name: product['name'],
-          category: product['category'],
-          price: product['price'],
-          image: product['image'],
+          name: product.name,
+          category: product.category,
+          price: product.price,
+          image: product.image,
           quantity: entry.value,
         );
       }).toList();
@@ -141,6 +110,172 @@ class _CashierPageState extends State<CashierPage> {
         ),
       );
     }
+  }
+
+  // Add this method inside _CashierPageState class
+  Widget _buildMenuSection(String category, List<MenuItem> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Text(
+            category,
+            style: TextStyle(
+              color: secondaryColor,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final product = items[index];
+            final globalIndex = _products.indexOf(product);
+            final quantity = _itemQuantities[globalIndex] ?? 0;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Image Container with fixed 1:1 aspect ratio
+                    ClipRRect(
+                      borderRadius: const BorderRadius.horizontal(
+                        left: Radius.circular(15),
+                      ),
+                      child: Container(
+                        width: 100, // Fixed width
+                        height:
+                            100, // Fixed height - same as width for 1:1 ratio
+                        decoration: BoxDecoration(
+                          color: Colors
+                              .grey[200], // Fallback color while image loads
+                        ),
+                        child: Image.asset(
+                          product.image,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    // Product Details
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical:
+                              12, // Reduced vertical padding to match image height
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    product.name,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Rp ${product.price}',
+                                    style: TextStyle(
+                                      color: primaryColor,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Quantity Controls
+                            Container(
+                              decoration: BoxDecoration(
+                                color: accentColor,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (quantity > 0) ...[
+                                    IconButton(
+                                      icon: const Icon(Icons.remove,
+                                          color: cardColor, size: 20),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (_itemQuantities[globalIndex]! >
+                                              0) {
+                                            _itemQuantities[globalIndex] =
+                                                _itemQuantities[globalIndex]! -
+                                                    1;
+                                          }
+                                        });
+                                      },
+                                      constraints: const BoxConstraints(
+                                        minWidth: 40,
+                                        minHeight: 30,
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                      child: Text(
+                                        '$quantity',
+                                        style: const TextStyle(
+                                          color: cardColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  IconButton(
+                                    icon: const Icon(Icons.add,
+                                        color: cardColor, size: 20),
+                                    onPressed: () => _addItem(globalIndex),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 40,
+                                      minHeight: 30,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
   }
 
   @override
@@ -226,190 +361,86 @@ class _CashierPageState extends State<CashierPage> {
                         ],
                       ),
                     )
-                  : ListView.builder(
-                      itemCount: _foundProducts.length,
-                      itemBuilder: (context, index) {
-                        final product = _foundProducts[index];
-                        final quantity = _itemQuantities[index] ?? 0;
-
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: cardColor,
-                            borderRadius: BorderRadius.circular(15),
-                            boxShadow: [
-                              BoxShadow(
-                                color: primaryColor.withOpacity(0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
+                  : SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildMenuSection(
+                            'Makanan',
+                            _foundProducts
+                                .where(
+                                    (product) => product.category == 'Makanan')
+                                .toList(),
                           ),
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(15),
-                                ),
-                                child: Image.asset(
-                                  product['image'],
-                                  height: 120,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            product['name'],
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              letterSpacing: 0.5,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  accentColor.withOpacity(0.1),
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Text(
-                                              product['category'],
-                                              style: TextStyle(
-                                                color: accentColor,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            'Rp ${product['price']}',
-                                            style: TextStyle(
-                                              color: primaryColor,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: accentColor,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          if (quantity > 0) ...[
-                                            IconButton(
-                                              icon: const Icon(Icons.remove,
-                                                  color: cardColor, size: 20),
-                                              onPressed: () {
-                                                setState(() {
-                                                  if (_itemQuantities[index]! >
-                                                      0) {
-                                                    _itemQuantities[index] =
-                                                        _itemQuantities[
-                                                                index]! -
-                                                            1;
-                                                  }
-                                                });
-                                              },
-                                              constraints: const BoxConstraints(
-                                                minWidth: 40,
-                                                minHeight: 30,
-                                              ),
-                                            ),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8),
-                                              child: Text(
-                                                '$quantity',
-                                                style: const TextStyle(
-                                                  color: cardColor,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                          IconButton(
-                                            icon: const Icon(Icons.add,
-                                                color: cardColor, size: 20),
-                                            onPressed: () => _addItem(index),
-                                            constraints: const BoxConstraints(
-                                              minWidth: 40,
-                                              minHeight: 30,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                          _buildMenuSection(
+                            'Minuman',
+                            _foundProducts
+                                .where(
+                                    (product) => product.category == 'Minuman')
+                                .toList(),
                           ),
-                        );
-                      },
+                        ],
+                      ),
                     ),
             ),
           ],
         ),
       ),
-      floatingActionButton: Stack(
-        children: [
-          FloatingActionButton.extended(
-            onPressed: _handleCheckout,
-            backgroundColor: accentColor,
-            label: const Text(
-              "Checkout",
-              style: TextStyle(
-                color: cardColor,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
-            ),
-            icon: const Icon(Icons.shopping_cart, color: cardColor),
-          ),
-          if (getTotalItems() > 0)
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: primaryColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  '${getTotalItems()}',
-                  style: const TextStyle(
-                    color: cardColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+      floatingActionButton: getTotalItems() > 0
+          ? Container(
+              margin: const EdgeInsets.all(16),
+              child: ElevatedButton(
+                onPressed: _handleCheckout,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.shopping_bag_outlined,
+                      color: cardColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "${getTotalItems()} items",
+                      style: const TextStyle(
+                        color: cardColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Container(
+                      width: 1,
+                      height: 20,
+                      color: cardColor.withOpacity(0.3),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      "Checkout",
+                      style: const TextStyle(
+                        color: cardColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-        ],
-      ),
+            )
+          : null,
     );
   }
 }

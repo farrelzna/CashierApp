@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_nganggur/splash_screen.dart';
 import 'package:project_nganggur/cashier_page.dart';
 
 void main() {
@@ -11,13 +12,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Cashier App',
+      title: 'Café Menu',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.grey[100],
+        primaryColor: const Color(0xFF1A1817),
+        fontFamily: 'Poppins',
       ),
-      home: const MainScreen(),
+      home: const SplashScreen(),
     );
   }
 }
@@ -80,7 +81,8 @@ class _MainScreenState extends State<MainScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+          color:
+              isSelected ? Colors.amber.withOpacity(0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -88,13 +90,13 @@ class _MainScreenState extends State<MainScreen> {
           children: [
             Icon(
               icon,
-              color: isSelected ? Colors.blue : Colors.grey,
+              color: isSelected ? Colors.amber : Colors.grey,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.blue : Colors.grey,
+                color: isSelected ? Colors.amber : Colors.grey,
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
