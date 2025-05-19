@@ -1,5 +1,7 @@
+
 import 'package:flutter/material.dart';
-import 'models/cart_item.dart';
+import 'package:project_nganggur/models/cart_item.dart';
+import 'package:project_nganggur/services/receipt_page.dart';  // Add this import
 
 class CheckoutPage extends StatefulWidget {
   final List<CartItem> selectedItems;
@@ -394,9 +396,23 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                         backgroundColor: Colors.green,
                                       ),
                                     );
-                                    widget
-                                        .onPaymentComplete(); // Call the callback
-                                    Navigator.pop(context);
+                                    widget.onPaymentComplete(); // Call the callback
+                                    
+                                    // Navigate to receipt page
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ReceiptPage(
+                                          items: widget.selectedItems,
+                                          totalAmount: finalTotal,
+                                          paymentMethod: _selectedPaymentMethod,
+                                          cashAmount: _selectedPaymentMethod == 'Cash' 
+                                              ? double.tryParse(_cashController.text) ?? 0 
+                                              : finalTotal,
+                                          change: change,
+                                        ),
+                                      ),
+                                    );
                                   },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryColor,

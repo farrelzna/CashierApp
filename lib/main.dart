@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:project_nganggur/splash_screen.dart';
-import 'package:project_nganggur/cashier_page.dart';
+import 'package:project_nganggur/pages/splash_screen.dart';
+import 'package:project_nganggur/pages/cashier_page.dart';
+// import 'package:project_nganggur/pages/categories_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
         primaryColor: const Color(0xFF1A1817),
         fontFamily: 'Poppins',
       ),
-      home: const SplashScreen(),
+      home: const SplashScreen(), // Changed to start with SplashScreen
     );
   }
 }
